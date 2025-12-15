@@ -71,6 +71,108 @@ def show_status():
     print()
 
 
+def rainbow_cycle(wait=0.01, iterations=5):
+    """Rainbow cycle animation."""
+    print(f"Running rainbow animation...")
+    try:
+        for j in range(256 * iterations):
+            for i in range(NUM_PIXELS):
+                pixel_index = (i * 256 // NUM_PIXELS) + j
+                pixels[i] = wheel(pixel_index & 255)
+            pixels.show()
+            time.sleep(wait)
+        print("Animation complete")
+    except KeyboardInterrupt:
+        print("\nAnimation stopped")
+
+
+def wheel(pos):
+    """Generate rainbow colors across 0-255 positions."""
+    if pos < 85:
+        return (pos * 3, 255 - pos * 3, 0)
+    elif pos < 170:
+        pos -= 85
+        return (255 - pos * 3, 0, pos * 3)
+    else:
+        pos -= 170
+        return (0, pos * 3, 255 - pos * 3)
+
+
+def pulse(r, g, b, wait=0.02, steps=50, cycles=2):
+    """Pulse effect - fade in and out."""
+    print(f"Running pulse animation RGB({r}, {g}, {b})...")
+    try:
+        for _ in range(cycles):
+            # Fade in
+            for i in range(steps):
+                brightness = i / steps
+                scaled_color = (int(r * brightness), int(g * brightness), int(b * brightness))
+                pixels.fill(scaled_color)
+                pixels.show()
+                time.sleep(wait)
+            
+            # Fade out
+            for i in range(steps, 0, -1):
+                brightness = i / steps
+                scaled_color = (int(r * brightness), int(g * brightness), int(b * brightness))
+                pixels.fill(scaled_color)
+                pixels.show()
+                time.sleep(wait)
+        clear_all()
+        print("Animation complete")
+    except KeyboardInterrupt:
+        print("\nAnimation stopped")
+
+
+def spinner(r, g, b, wait=0.1, rotations=5):
+    """Spinning single LED effect."""
+    print(f"Running spinner animation RGB({r}, {g}, {b})...")
+    try:
+        for _ in range(rotations * NUM_PIXELS):
+            for i in range(NUM_PIXELS):
+                pixels.fill((0, 0, 0))
+                pixels[i] = (r, g, b)
+                pixels.show()
+                time.sleep(wait)
+        clear_all()
+        print("Animation complete")
+    except KeyboardInterrupt:
+        print("\nAnimation stopped")
+
+
+def theater_chase(r, g, b, wait=0.1, iterations=10):
+    """Theater chase animation."""
+    print(f"Running theater chase animation RGB({r}, {g}, {b})...")
+    try:
+        for j in range(iterations):
+            for q in range(3):
+                for i in range(0, NUM_PIXELS, 3):
+                    if i + q < NUM_PIXELS:
+                        pixels[i + q] = (r, g, b)
+                pixels.show()
+                time.sleep(wait)
+                for i in range(0, NUM_PIXELS, 3):
+                    if i + q < NUM_PIXELS:
+                        pixels[i + q] = (0, 0, 0)
+        clear_all()
+        print("Animation complete")
+    except KeyboardInterrupt:
+        print("\nAnimation stopped")
+
+
+def color_wipe(r, g, b, wait=0.05):
+    """Wipe color across display one pixel at a time."""
+    print(f"Running color wipe RGB({r}, {g}, {b})...")
+    try:
+        for i in range(NUM_PIXELS):
+            pixels[i] = (r, g, b)
+            pixels.show()
+            time.sleep(wait)
+        print("Animation complete")
+    except KeyboardInterrupt:
+        print("\nAnimation stopped")
+
+
 def print_help():
     """Print available commands."""
     print("\n=== NeoPixel Manual Control ===")
@@ -83,12 +185,21 @@ def print_help():
     print("  preset <name>            - Load color preset")
     print("  help                     - Show this help message")
     print("  exit                     - Exit program")
+    print("\nAnimations:")
+    print("  rainbow                  - Rainbow cycle animation")
+    print("  pulse <r> <g> <b>        - Pulsing/breathing effect")
+    print("  spinner <r> <g> <b>      - Single LED spinner")
+    print("  chase <r> <g> <b>        - Theater chase effect")
+    print("  wipe <r> <g> <b>         - Color wipe effect")
     print("\nPresets:")
     print("  red, green, blue, white, yellow, cyan, magenta, orange, purple")
     print("\nExamples:")
     print("  all 255 0 0              - All LEDs red")
     print("  set 0 0 255 0            - LED 0 green")
     print("  preset blue              - All LEDs blue")
+    print("  rainbow                  - Run rainbow animation")
+    print("  pulse 255 0 255          - Purple pulse effect")
+    print("  spinner 0 255 0          - Green spinner")
     print("  brightness 0.5           - Set 50% brightness")
     print()
 
@@ -168,6 +279,37 @@ def parse_command(command):
                 load_preset(parts[1])
             else:
                 print("Usage: preset <name>")
+        
+        elif cmd == 'rainbow':
+            rainbow_cycle()
+        
+        elif cmd == 'pulse':
+            if len(parts) == 4:
+                r, g, b = int(parts[1]), int(parts[2]), int(parts[3])
+                pulse(r, g, b)
+            else:
+                print("Usage: pulse <r> <g> <b>")
+        
+        elif cmd == 'spinner':
+            if len(parts) == 4:
+                r, g, b = int(parts[1]), int(parts[2]), int(parts[3])
+                spinner(r, g, b)
+            else:
+                print("Usage: spinner <r> <g> <b>")
+        
+        elif cmd == 'chase':
+            if len(parts) == 4:
+                r, g, b = int(parts[1]), int(parts[2]), int(parts[3])
+                theater_chase(r, g, b)
+            else:
+                print("Usage: chase <r> <g> <b>")
+        
+        elif cmd == 'wipe':
+            if len(parts) == 4:
+                r, g, b = int(parts[1]), int(parts[2]), int(parts[3])
+                color_wipe(r, g, b)
+            else:
+                print("Usage: wipe <r> <g> <b>")
         
         else:
             print(f"Unknown command: {cmd}")
