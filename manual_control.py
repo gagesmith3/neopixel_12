@@ -73,19 +73,22 @@ def show_status():
     print()
 
 
-def rainbow_cycle(wait=0.01, iterations=5):
-    """Rainbow cycle animation."""
-    print(f"Running rainbow animation...")
+def rainbow_cycle(wait=0.02):
+    """Rainbow cycle animation (runs until interrupted)."""
+    print("Running rainbow animation (Ctrl+C to stop)...")
     try:
-        for j in range(256 * iterations):
+        j = 0
+        while True:
             for i in range(NUM_PIXELS):
                 pixel_index = (i * 256 // NUM_PIXELS) + j
                 pixels[i] = wheel(pixel_index & 255)
             pixels.show()
             time.sleep(wait)
-        print("Animation complete")
+            j = (j + 1) % 256
     except KeyboardInterrupt:
         print("\nAnimation stopped")
+    finally:
+        clear_all()
 
 
 def wheel(pos):
@@ -100,53 +103,50 @@ def wheel(pos):
         return (0, pos * 3, 255 - pos * 3)
 
 
-def pulse(r, g, b, wait=0.02, steps=50, cycles=2):
-    """Pulse effect - fade in and out."""
-    print(f"Running pulse animation RGB({r}, {g}, {b})...")
+def pulse(r, g, b, wait=0.025, steps=80):
+    """Pulse effect - fade in and out (runs until interrupted)."""
+    print(f"Running pulse animation RGB({r}, {g}, {b}) (Ctrl+C to stop)...")
     try:
-        for _ in range(cycles):
-            # Fade in
-            for i in range(steps):
+        while True:
+            for i in range(steps + 1):
                 brightness = i / steps
                 scaled_color = (int(r * brightness), int(g * brightness), int(b * brightness))
                 pixels.fill(scaled_color)
                 pixels.show()
                 time.sleep(wait)
-            
-            # Fade out
-            for i in range(steps, 0, -1):
+            for i in range(steps, -1, -1):
                 brightness = i / steps
                 scaled_color = (int(r * brightness), int(g * brightness), int(b * brightness))
                 pixels.fill(scaled_color)
                 pixels.show()
                 time.sleep(wait)
-        clear_all()
-        print("Animation complete")
     except KeyboardInterrupt:
         print("\nAnimation stopped")
+    finally:
+        clear_all()
 
 
-def spinner(r, g, b, wait=0.1, rotations=5):
-    """Spinning single LED effect."""
-    print(f"Running spinner animation RGB({r}, {g}, {b})...")
+def spinner(r, g, b, wait=0.12):
+    """Spinning single LED effect (runs until interrupted)."""
+    print(f"Running spinner animation RGB({r}, {g}, {b}) (Ctrl+C to stop)...")
     try:
-        for _ in range(rotations * NUM_PIXELS):
+        while True:
             for i in range(NUM_PIXELS):
                 pixels.fill((0, 0, 0))
                 pixels[i] = (r, g, b)
                 pixels.show()
                 time.sleep(wait)
-        clear_all()
-        print("Animation complete")
     except KeyboardInterrupt:
         print("\nAnimation stopped")
+    finally:
+        clear_all()
 
 
-def theater_chase(r, g, b, wait=0.1, iterations=10):
-    """Theater chase animation."""
-    print(f"Running theater chase animation RGB({r}, {g}, {b})...")
+def theater_chase(r, g, b, wait=0.12):
+    """Theater chase animation (runs until interrupted)."""
+    print(f"Running theater chase animation RGB({r}, {g}, {b}) (Ctrl+C to stop)...")
     try:
-        for j in range(iterations):
+        while True:
             for q in range(3):
                 for i in range(0, NUM_PIXELS, 3):
                     if i + q < NUM_PIXELS:
@@ -156,31 +156,37 @@ def theater_chase(r, g, b, wait=0.1, iterations=10):
                 for i in range(0, NUM_PIXELS, 3):
                     if i + q < NUM_PIXELS:
                         pixels[i + q] = (0, 0, 0)
+    except KeyboardInterrupt:
+        print("\nAnimation stopped")
+    finally:
         clear_all()
-        print("Animation complete")
+
+
+def color_wipe(r, g, b, wait=0.08):
+    """Wipe color across display one pixel at a time (loops until interrupted)."""
+    print(f"Running color wipe RGB({r}, {g}, {b}) (Ctrl+C to stop)...")
+    try:
+        while True:
+            for i in range(NUM_PIXELS):
+                pixels[i] = (r, g, b)
+                pixels.show()
+                time.sleep(wait)
+            for i in range(NUM_PIXELS):
+                pixels[i] = (0, 0, 0)
+                pixels.show()
+                time.sleep(wait)
     except KeyboardInterrupt:
         print("\nAnimation stopped")
+    finally:
+        clear_all()
 
 
-def color_wipe(r, g, b, wait=0.05):
-    """Wipe color across display one pixel at a time."""
-    print(f"Running color wipe RGB({r}, {g}, {b})...")
+def comet(r, g, b, wait=0.07, tail=5):
+    """Comet animation with a fading tail (runs until interrupted)."""
+    print(f"Running comet animation RGB({r}, {g}, {b}) (Ctrl+C to stop)...")
     try:
-        for i in range(NUM_PIXELS):
-            pixels[i] = (r, g, b)
-            pixels.show()
-            time.sleep(wait)
-        print("Animation complete")
-    except KeyboardInterrupt:
-        print("\nAnimation stopped")
-
-
-def comet(r, g, b, wait=0.05, tail=4, laps=3):
-    """Comet animation with a fading tail."""
-    print(f"Running comet animation RGB({r}, {g}, {b})...")
-    try:
-        length = NUM_PIXELS * laps
-        for step in range(length):
+        step = 0
+        while True:
             head = step % NUM_PIXELS
             for i in range(NUM_PIXELS):
                 distance = (head - i) % NUM_PIXELS
@@ -193,18 +199,19 @@ def comet(r, g, b, wait=0.05, tail=4, laps=3):
                     pixels[i] = (0, 0, 0)
             pixels.show()
             time.sleep(wait)
-        clear_all()
-        print("Animation complete")
+            step += 1
     except KeyboardInterrupt:
         print("\nAnimation stopped")
+    finally:
+        clear_all()
 
 
-def scanner(r, g, b, wait=0.05, cycles=4, tail=3):
-    """Larson scanner (KITT/Cylon) with fading tail."""
-    print(f"Running scanner animation RGB({r}, {g}, {b})...")
+def scanner(r, g, b, wait=0.07, tail=4):
+    """Larson scanner (KITT/Cylon) with fading tail (runs until interrupted)."""
+    print(f"Running scanner animation RGB({r}, {g}, {b}) (Ctrl+C to stop)...")
     try:
         positions = list(range(NUM_PIXELS)) + list(range(NUM_PIXELS - 2, 0, -1))
-        for _ in range(cycles):
+        while True:
             for head in positions:
                 for i in range(NUM_PIXELS):
                     distance = abs(head - i)
@@ -217,22 +224,22 @@ def scanner(r, g, b, wait=0.05, cycles=4, tail=3):
                         pixels[i] = (0, 0, 0)
                 pixels.show()
                 time.sleep(wait)
-        clear_all()
-        print("Animation complete")
     except KeyboardInterrupt:
         print("\nAnimation stopped")
+    finally:
+        clear_all()
 
 
-def twinkle(count=40, wait=0.05, decay=0.8):
-    """Random twinkling pixels."""
-    print("Running twinkle animation...")
+def twinkle(wait=0.07, decay=0.82):
+    """Random twinkling pixels (runs until interrupted)."""
+    print("Running twinkle animation (Ctrl+C to stop)...")
     try:
         colors = [
             (255, 255, 255), (255, 0, 0), (0, 255, 0), (0, 0, 255),
             (255, 255, 0), (0, 255, 255), (255, 0, 255), (255, 128, 0)
         ]
         frame = [(0, 0, 0)] * NUM_PIXELS
-        for _ in range(count):
+        while True:
             idx = random.randrange(NUM_PIXELS)
             frame[idx] = random.choice(colors)
             for i, (r, g, b) in enumerate(frame):
@@ -240,18 +247,18 @@ def twinkle(count=40, wait=0.05, decay=0.8):
             pixels[:] = frame
             pixels.show()
             time.sleep(wait)
-        clear_all()
-        print("Animation complete")
     except KeyboardInterrupt:
         print("\nAnimation stopped")
+    finally:
+        clear_all()
 
 
-def bounce(r, g, b, wait=0.05, width=3, cycles=6):
-    """Color block bouncing around the ring."""
-    print(f"Running bounce animation RGB({r}, {g}, {b})...")
+def bounce(r, g, b, wait=0.07, width=3):
+    """Color block bouncing around the ring (runs until interrupted)."""
+    print(f"Running bounce animation RGB({r}, {g}, {b}) (Ctrl+C to stop)...")
     try:
         positions = list(range(NUM_PIXELS - width + 1)) + list(range(NUM_PIXELS - width - 1, -1, -1))
-        for _ in range(cycles):
+        while True:
             for start in positions:
                 pixels.fill((0, 0, 0))
                 for i in range(width):
@@ -259,51 +266,53 @@ def bounce(r, g, b, wait=0.05, width=3, cycles=6):
                     pixels[idx] = (r, g, b)
                 pixels.show()
                 time.sleep(wait)
-        clear_all()
-        print("Animation complete")
     except KeyboardInterrupt:
         print("\nAnimation stopped")
+    finally:
+        clear_all()
 
 
-def breath(r, g, b, wait=0.02, steps=120, cycles=3):
-    """Smooth global breathing effect."""
-    print(f"Running breath animation RGB({r}, {g}, {b})...")
+def breath(r, g, b, wait=0.025, steps=180):
+    """Smooth global breathing effect (runs until interrupted)."""
+    print(f"Running breath animation RGB({r}, {g}, {b}) (Ctrl+C to stop)...")
     try:
-        for _ in range(cycles):
-            for i in range(steps):
+        while True:
+            for i in range(steps + 1):
                 t = i / steps
                 brightness = 0.5 - 0.5 * math.cos(math.pi * t)
                 pixels.fill((int(r * brightness), int(g * brightness), int(b * brightness)))
                 pixels.show()
                 time.sleep(wait)
-        clear_all()
-        print("Animation complete")
     except KeyboardInterrupt:
         print("\nAnimation stopped")
+    finally:
+        clear_all()
 
 
-def wheel_spin(wait=0.02, rotations=5):
-    """Spinning rainbow gradient around the ring."""
-    print("Running wheel animation...")
+def wheel_spin(wait=0.025):
+    """Spinning rainbow gradient around the ring (runs until interrupted)."""
+    print("Running wheel animation (Ctrl+C to stop)...")
     try:
-        for j in range(256 * rotations):
+        j = 0
+        while True:
             for i in range(NUM_PIXELS):
                 pixel_index = (i * 256 // NUM_PIXELS) + j
                 pixels[i] = wheel(pixel_index & 255)
             pixels.show()
             time.sleep(wait)
-        clear_all()
-        print("Animation complete")
+            j = (j + 1) % 256
     except KeyboardInterrupt:
         print("\nAnimation stopped")
+    finally:
+        clear_all()
 
 
-def wave(r, g, b, wait=0.03, cycles=4):
-    """Sine-wave brightness around the ring."""
-    print(f"Running wave animation RGB({r}, {g}, {b})...")
+def wave(r, g, b, wait=0.045):
+    """Sine-wave brightness around the ring (runs until interrupted)."""
+    print(f"Running wave animation RGB({r}, {g}, {b}) (Ctrl+C to stop)...")
     try:
-        frames = NUM_PIXELS * cycles
-        for step in range(frames):
+        step = 0
+        while True:
             phase = (2 * math.pi * step) / NUM_PIXELS
             for i in range(NUM_PIXELS):
                 offset = (i / NUM_PIXELS) * 2 * math.pi
@@ -311,10 +320,11 @@ def wave(r, g, b, wait=0.03, cycles=4):
                 pixels[i] = (int(r * amplitude), int(g * amplitude), int(b * amplitude))
             pixels.show()
             time.sleep(wait)
-        clear_all()
-        print("Animation complete")
+            step += 1
     except KeyboardInterrupt:
         print("\nAnimation stopped")
+    finally:
+        clear_all()
 
 
 def print_help():
