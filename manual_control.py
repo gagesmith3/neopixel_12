@@ -5,6 +5,8 @@ Interactive control for individual LEDs and colors
 """
 
 import time
+import math
+import random
 import board
 import neopixel
 import sys
@@ -173,6 +175,148 @@ def color_wipe(r, g, b, wait=0.05):
         print("\nAnimation stopped")
 
 
+def comet(r, g, b, wait=0.05, tail=4, laps=3):
+    """Comet animation with a fading tail."""
+    print(f"Running comet animation RGB({r}, {g}, {b})...")
+    try:
+        length = NUM_PIXELS * laps
+        for step in range(length):
+            head = step % NUM_PIXELS
+            for i in range(NUM_PIXELS):
+                distance = (head - i) % NUM_PIXELS
+                if distance == 0:
+                    pixels[i] = (r, g, b)
+                elif 0 < distance <= tail:
+                    fade = max(0, 1 - (distance / (tail + 1)))
+                    pixels[i] = (int(r * fade), int(g * fade), int(b * fade))
+                else:
+                    pixels[i] = (0, 0, 0)
+            pixels.show()
+            time.sleep(wait)
+        clear_all()
+        print("Animation complete")
+    except KeyboardInterrupt:
+        print("\nAnimation stopped")
+
+
+def scanner(r, g, b, wait=0.05, cycles=4, tail=3):
+    """Larson scanner (KITT/Cylon) with fading tail."""
+    print(f"Running scanner animation RGB({r}, {g}, {b})...")
+    try:
+        positions = list(range(NUM_PIXELS)) + list(range(NUM_PIXELS - 2, 0, -1))
+        for _ in range(cycles):
+            for head in positions:
+                for i in range(NUM_PIXELS):
+                    distance = abs(head - i)
+                    if distance == 0:
+                        pixels[i] = (r, g, b)
+                    elif distance <= tail:
+                        fade = max(0, 1 - (distance / (tail + 1)))
+                        pixels[i] = (int(r * fade), int(g * fade), int(b * fade))
+                    else:
+                        pixels[i] = (0, 0, 0)
+                pixels.show()
+                time.sleep(wait)
+        clear_all()
+        print("Animation complete")
+    except KeyboardInterrupt:
+        print("\nAnimation stopped")
+
+
+def twinkle(count=40, wait=0.05, decay=0.8):
+    """Random twinkling pixels."""
+    print("Running twinkle animation...")
+    try:
+        colors = [
+            (255, 255, 255), (255, 0, 0), (0, 255, 0), (0, 0, 255),
+            (255, 255, 0), (0, 255, 255), (255, 0, 255), (255, 128, 0)
+        ]
+        frame = [(0, 0, 0)] * NUM_PIXELS
+        for _ in range(count):
+            idx = random.randrange(NUM_PIXELS)
+            frame[idx] = random.choice(colors)
+            for i, (r, g, b) in enumerate(frame):
+                frame[i] = (int(r * decay), int(g * decay), int(b * decay))
+            pixels[:] = frame
+            pixels.show()
+            time.sleep(wait)
+        clear_all()
+        print("Animation complete")
+    except KeyboardInterrupt:
+        print("\nAnimation stopped")
+
+
+def bounce(r, g, b, wait=0.05, width=3, cycles=6):
+    """Color block bouncing around the ring."""
+    print(f"Running bounce animation RGB({r}, {g}, {b})...")
+    try:
+        positions = list(range(NUM_PIXELS - width + 1)) + list(range(NUM_PIXELS - width - 1, -1, -1))
+        for _ in range(cycles):
+            for start in positions:
+                pixels.fill((0, 0, 0))
+                for i in range(width):
+                    idx = (start + i) % NUM_PIXELS
+                    pixels[idx] = (r, g, b)
+                pixels.show()
+                time.sleep(wait)
+        clear_all()
+        print("Animation complete")
+    except KeyboardInterrupt:
+        print("\nAnimation stopped")
+
+
+def breath(r, g, b, wait=0.02, steps=120, cycles=3):
+    """Smooth global breathing effect."""
+    print(f"Running breath animation RGB({r}, {g}, {b})...")
+    try:
+        for _ in range(cycles):
+            for i in range(steps):
+                t = i / steps
+                brightness = 0.5 - 0.5 * math.cos(math.pi * t)
+                pixels.fill((int(r * brightness), int(g * brightness), int(b * brightness)))
+                pixels.show()
+                time.sleep(wait)
+        clear_all()
+        print("Animation complete")
+    except KeyboardInterrupt:
+        print("\nAnimation stopped")
+
+
+def wheel_spin(wait=0.02, rotations=5):
+    """Spinning rainbow gradient around the ring."""
+    print("Running wheel animation...")
+    try:
+        for j in range(256 * rotations):
+            for i in range(NUM_PIXELS):
+                pixel_index = (i * 256 // NUM_PIXELS) + j
+                pixels[i] = wheel(pixel_index & 255)
+            pixels.show()
+            time.sleep(wait)
+        clear_all()
+        print("Animation complete")
+    except KeyboardInterrupt:
+        print("\nAnimation stopped")
+
+
+def wave(r, g, b, wait=0.03, cycles=4):
+    """Sine-wave brightness around the ring."""
+    print(f"Running wave animation RGB({r}, {g}, {b})...")
+    try:
+        frames = NUM_PIXELS * cycles
+        for step in range(frames):
+            phase = (2 * math.pi * step) / NUM_PIXELS
+            for i in range(NUM_PIXELS):
+                offset = (i / NUM_PIXELS) * 2 * math.pi
+                amplitude = 0.5 * (1 + math.sin(phase + offset))
+                pixels[i] = (int(r * amplitude), int(g * amplitude), int(b * amplitude))
+            pixels.show()
+            time.sleep(wait)
+        clear_all()
+        print("Animation complete")
+    except KeyboardInterrupt:
+        print("\nAnimation stopped")
+
+
 def print_help():
     """Print available commands."""
     print("\n=== NeoPixel Manual Control ===")
@@ -191,6 +335,13 @@ def print_help():
     print("  spinner <r> <g> <b>      - Single LED spinner")
     print("  chase <r> <g> <b>        - Theater chase effect")
     print("  wipe <r> <g> <b>         - Color wipe effect")
+    print("  comet <r> <g> <b>        - Comet with fading tail")
+    print("  scanner <r> <g> <b>      - Larson scanner (KITT/Cylon)")
+    print("  twinkle                  - Random twinkling pixels")
+    print("  bounce <r> <g> <b>       - Bouncing color block")
+    print("  breath <r> <g> <b>       - Smooth global breathing")
+    print("  wheel                    - Spinning rainbow gradient")
+    print("  wave <r> <g> <b>         - Sine wave brightness")
     print("\nPresets:")
     print("  red, green, blue, white, yellow, cyan, magenta, orange, purple")
     print("\nExamples:")
@@ -200,6 +351,11 @@ def print_help():
     print("  rainbow                  - Run rainbow animation")
     print("  pulse 255 0 255          - Purple pulse effect")
     print("  spinner 0 255 0          - Green spinner")
+    print("  comet 255 255 0          - Yellow comet")
+    print("  scanner 0 255 255        - Cyan scanner")
+    print("  bounce 255 128 0         - Orange bouncing block")
+    print("  breath 0 0 255           - Blue breathing")
+    print("  wheel                    - Rainbow wheel")
     print("  brightness 0.5           - Set 50% brightness")
     print()
 
@@ -310,6 +466,47 @@ def parse_command(command):
                 color_wipe(r, g, b)
             else:
                 print("Usage: wipe <r> <g> <b>")
+
+        elif cmd == 'comet':
+            if len(parts) == 4:
+                r, g, b = int(parts[1]), int(parts[2]), int(parts[3])
+                comet(r, g, b)
+            else:
+                print("Usage: comet <r> <g> <b>")
+
+        elif cmd == 'scanner':
+            if len(parts) == 4:
+                r, g, b = int(parts[1]), int(parts[2]), int(parts[3])
+                scanner(r, g, b)
+            else:
+                print("Usage: scanner <r> <g> <b>")
+
+        elif cmd == 'twinkle':
+            twinkle()
+
+        elif cmd == 'bounce':
+            if len(parts) == 4:
+                r, g, b = int(parts[1]), int(parts[2]), int(parts[3])
+                bounce(r, g, b)
+            else:
+                print("Usage: bounce <r> <g> <b>")
+
+        elif cmd == 'breath':
+            if len(parts) == 4:
+                r, g, b = int(parts[1]), int(parts[2]), int(parts[3])
+                breath(r, g, b)
+            else:
+                print("Usage: breath <r> <g> <b>")
+
+        elif cmd == 'wheel':
+            wheel_spin()
+
+        elif cmd == 'wave':
+            if len(parts) == 4:
+                r, g, b = int(parts[1]), int(parts[2]), int(parts[3])
+                wave(r, g, b)
+            else:
+                print("Usage: wave <r> <g> <b>")
         
         else:
             print(f"Unknown command: {cmd}")
